@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+/* Theme 1: Storyboard Parchment (Default) */
+.theme-paper {
+  --bg-color: #F7F4EE;
+  --text-color: #111827;
+  --card-bg: #FFFFFF;
+  --card-border: #E2E0D8;
+  --accent-color: #15803D;
+  --accent-hover: #166534;
+  --badge-bg: #EAE8E0;
+  --subtext-color: #4B5563;
+}
+
+/* Theme 2: Ghibli Twilight (Dark Mode) */
+.theme-twilight {
+  --bg-color: #0B0F19;
+  --text-color: #F9FAFB;
+  --card-bg: #111827;
+  --card-border: #1F2937;
+  --accent-color: #D97706;
+  --accent-hover: #B45309;
+  --badge-bg: #1F2937;
+  --subtext-color: #9CA3AF;
+}
+
+/* Theme 3: Cherry Blossom (Sakura Spring Pastel) */
+.theme-cherry {
+  --bg-color: #FFF5F7;
+  --text-color: #2D181C;
+  --card-bg: #FFFFFF;
+  --card-border: #FCE7F3;
+  --accent-color: #DB2777;
+  --accent-hover: #BE185D;
+  --badge-bg: #FCE7F3;
+  --subtext-color: #704B54;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.font-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--card-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-color);
+}
+
+/* Keyframe animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
