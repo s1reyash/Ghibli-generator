@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { KeyRound, ShieldCheck, ArrowRight, UserCheck } from 'lucide-react';
+import { KeyRound, ShieldCheck, ArrowRight } from 'lucide-react';
 
 interface LoginPageProps {
   onLoginSuccess: (username: string) => void;
@@ -13,18 +13,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   const handlePasscodeSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!passcode || passcode.trim() === '') {
-      setErrorMsg('Please enter a passcode or click Guest Access below.');
+      setErrorMsg('Please enter the passcode.');
       return;
     }
 
-    // Accept passcode 'ghibli2026' or 'aditya' or any non-empty key
-    const finalName = username.trim() || 'Studio Director';
-    localStorage.setItem('ghibli_auth_session', JSON.stringify({ username: finalName, timestamp: Date.now() }));
-    onLoginSuccess(finalName);
-  };
+    if (passcode !== 'Shreyash@123') {
+      setErrorMsg('Incorrect passcode. Access denied.');
+      return;
+    }
 
-  const handleGuestLogin = () => {
-    const finalName = 'Guest Director';
+    const finalName = username.trim() || 'Studio Director';
     localStorage.setItem('ghibli_auth_session', JSON.stringify({ username: finalName, timestamp: Date.now() }));
     onLoginSuccess(finalName);
   };
@@ -63,7 +61,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
               type="text"
               value={username}
               onChange={e => setUsername(e.target.value)}
-              placeholder="e.g. Aditya"
+              placeholder="Enter your name"
               className="w-full px-4 py-2.5 rounded-xl border border-[#E2E0D8] bg-[#FAF9F6] text-xs font-semibold text-[#111827] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#111827]"
             />
           </div>
@@ -81,7 +79,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   setPasscode(e.target.value);
                   setErrorMsg('');
                 }}
-                placeholder="Enter passcode (e.g. ghibli2026)"
+                placeholder="Enter passcode"
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E2E0D8] bg-[#FAF9F6] text-xs font-semibold text-[#111827] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#111827]"
               />
             </div>
@@ -98,24 +96,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             <ArrowRight className="w-4 h-4 text-amber-400" />
           </button>
         </form>
-
-        {/* Divider */}
-        <div className="relative flex items-center justify-center">
-          <div className="border-t border-[#E2E0D8] w-full" />
-          <span className="bg-white px-3 text-[11px] text-[#9CA3AF] font-semibold uppercase tracking-wider absolute">
-            or
-          </span>
-        </div>
-
-        {/* Guest Access Button */}
-        <button
-          onClick={handleGuestLogin}
-          type="button"
-          className="w-full py-2.5 rounded-xl bg-[#FAF9F6] border border-[#E2E0D8] text-[#111827] font-semibold text-xs hover:bg-[#EAE8E0] transition flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <UserCheck className="w-4 h-4 text-[#15803D]" />
-          <span>Enter as Guest Director</span>
-        </button>
 
         {/* Footer info */}
         <div className="pt-2 text-center text-[11px] text-[#9CA3AF]">
