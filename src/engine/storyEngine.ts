@@ -1,5 +1,5 @@
-import type { UserSelections, GenerationResult, StoryBible, ScenePrompt } from '../types/generator';
-import { DEFAULT_NEGATIVE_PROMPT, CHARACTERS, ANIMALS, OBJECTS, PLACES, MOODS, TIMES, WEATHER } from '../data/presets';
+import type { UserSelections, GenerationResult, StoryBible, ScenePrompt, YouTubeMetadata } from '../types/generator';
+import { DEFAULT_NEGATIVE_PROMPT, CHARACTERS, ANIMALS, OBJECTS, PLACES, EVENTS, MOODS, TIMES, WEATHER } from '../data/presets';
 import { CAMERA_SHOTS, LIGHTING_STYLES } from '../components/CameraLightingMatrix';
 
 // Helper to pick random element
@@ -9,7 +9,7 @@ const pick = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 const resolveName = (selected: string, custom: string, defaultFallback: string): string => {
   if (custom && custom.trim().length > 0) return custom.trim();
   if (selected) {
-    const found = [...CHARACTERS, ...ANIMALS, ...OBJECTS, ...PLACES, ...MOODS, ...TIMES, ...WEATHER].find(p => p.id === selected);
+    const found = [...CHARACTERS, ...ANIMALS, ...OBJECTS, ...PLACES, ...EVENTS, ...MOODS, ...TIMES, ...WEATHER].find(p => p.id === selected);
     if (found) return found.name;
     return selected;
   }
@@ -88,11 +88,13 @@ export const generateSurpriseSelections = (): UserSelections => {
   const randomAnim = [pick(ANIMALS).name];
   const randomObj = [pick(OBJECTS).name];
   const randomPlace = pick(PLACES).name;
+  const randomEvent = pick(EVENTS).name;
   const randomMood = pick(MOODS).name;
   const randomTime = pick(TIMES).name;
   const randomWeather = pick(WEATHER).name;
   const randomCam = pick(CAMERA_SHOTS).name;
   const randomLight = pick(LIGHTING_STYLES).name;
+  const randomCount = pick([2, 3, 4, 5]);
 
   return {
     character: randomChar,
@@ -103,15 +105,20 @@ export const generateSurpriseSelections = (): UserSelections => {
     customObject: '',
     place: randomPlace,
     customPlace: '',
+    event: randomEvent,
+    customEvent: '',
     mood: randomMood,
     time: randomTime,
     weather: randomWeather,
     cameraStyle: randomCam,
     lightingStyle: randomLight,
+    sceneCount: randomCount,
   };
 };
 
 export const generateStory = (selections: UserSelections): GenerationResult => {
+  const targetCount = selections.sceneCount && selections.sceneCount >= 1 && selections.sceneCount <= 5 ? selections.sceneCount : 3;
+
   const charName = resolveName(selections.character, selections.customCharacter, 'Girl');
   const animNames = selections.animals.length > 0 
     ? selections.animals.map(a => resolveName(a, '', a)).join(' and ') 
@@ -124,6 +131,7 @@ export const generateStory = (selections: UserSelections): GenerationResult => {
   const primaryObj = selections.objects[0] ? resolveName(selections.objects[0], '', selections.objects[0]) : (selections.customObject || 'Lantern');
 
   const placeName = resolveName(selections.place, selections.customPlace, 'Enchanted Forest');
+  const eventName = resolveName(selections.event || '', selections.customEvent || '', '');
   const moodName = selections.mood || 'Peaceful';
 
   const timeName = selections.time || pick(['Golden Hour', 'Late Afternoon', 'Early Morning', 'Sunset', 'Twilight']);
@@ -150,16 +158,12 @@ export const generateStory = (selections: UserSelections): GenerationResult => {
     palette: `natural earthy green, sky blue, warm sunlight highlights, and soft shadow tones`
   };
 
-  const titleTemplates = [
-    `The ${primaryObj} in the ${placeName}`,
-    `Whispers of the ${placeName}`,
-    `The ${charName} and the ${primaryAnimal}`,
-    `A ${moodName} Day in ${placeName}`,
-    `The Secrets of the ${primaryObj}`,
-  ];
+  const titleTemplates = eventName 
+    ? [`The ${eventName} with ${primaryObj}`, `${charName}'s ${eventName}`, `A ${moodName} ${eventName} in ${placeName}`]
+    : [`The ${primaryObj} in the ${placeName}`, `Whispers of the ${placeName}`, `The ${charName} and the ${primaryAnimal}`];
   const storyTitle = pick(titleTemplates);
 
-  const conceptSummary = `In a ${moodName.toLowerCase()} ${placeName.toLowerCase()} during ${timeName.toLowerCase()}, a ${charName.toLowerCase()} carrying a ${primaryObj.toLowerCase()} encounters a ${primaryAnimal.toLowerCase()}, forming a quiet bond through a magical 3-part 9:16 vertical journey.`;
+  const conceptSummary = `In a ${moodName.toLowerCase()} ${placeName.toLowerCase()} during ${timeName.toLowerCase()}${eventName ? ` during a ${eventName.toLowerCase()}` : ''}, a ${charName.toLowerCase()} carrying a ${primaryObj.toLowerCase()} encounters a ${primaryAnimal.toLowerCase()}, forming a quiet bond through a magical ${targetCount}-part 9:16 vertical journey.`;
 
   const bible: StoryBible = {
     title: storyTitle,
@@ -178,7 +182,7 @@ export const generateStory = (selections: UserSelections): GenerationResult => {
     },
     environmentLock: {
       name: placeName,
-      details: envLockData.details,
+      details: envLockData.details + (eventName ? ` (${eventName} setting)` : ''),
       palette: envLockData.palette,
       lighting: chosenLighting,
       weather: weatherName,
@@ -188,6 +192,7 @@ export const generateStory = (selections: UserSelections): GenerationResult => {
       names: [objNames],
       details: objDesc,
     },
+    eventLock: eventName ? { name: eventName, details: `Visual setting and scenario context for ${eventName}` } : undefined,
     asmrAudioProfile: {
       foleyDetails: [
         'Subtle cloth rustle of linen garment',
@@ -200,120 +205,108 @@ export const generateStory = (selections: UserSelections): GenerationResult => {
     },
   };
 
-  const scene1EndFrame = `FINAL FRAME SCENE 1: The ${charName} kneels close to the ${primaryAnimal} in ${placeName}, holding the ${primaryObj} between them, framed vertically in 9:16 aspect ratio.`;
-  const scene1PromptText = `🎬 VIDEO 1 — BEGINNING (10 SECONDS)
+  // Generate dynamic N scene prompts with ZERO-JERK MOTION CONTINUITY LOCKS
+  const scenes: ScenePrompt[] = [];
 
-[DURATION]: 10 seconds
+  for (let idx = 1; idx <= targetCount; idx++) {
+    const isFirst = idx === 1;
+    const isLast = idx === targetCount;
+
+    const sceneTitle = `Scene 0${idx} — ${isFirst ? 'Beginning' : isLast ? 'Resolution' : `Part ${idx}`}`;
+    const sceneSubtitle = isFirst 
+      ? 'Discovery & Meeting' 
+      : isLast 
+      ? 'Peaceful Sanctuary' 
+      : `Journey Stage 0${idx}`;
+
+    // Zero-Jerk Motion Vector Lock
+    const motionLockVector = !isFirst
+      ? `[ZERO-JERK MOTION CONTINUITY LOCK]: First frame of Scene 0${idx} matches EXACTLY the last frame of Scene 0${idx - 1}. Lock subject position (${charName} at center-right), subject velocity vector (walking forward at 0.5m/s), facing angle (3/4 profile facing left), clothing fold state, camera focal length (50mm lens), and lighting angle. NO sudden angle jump, NO pose pop, NO abrupt speed drop.`
+      : `[BASELINE FRAME LOCK]: Establish stable 9:16 vertical tracking shot with steady 0.5m/s subject momentum.`;
+
+    const endFrameAnchor = `FINAL FRAME SCENE 0${idx}: The ${charName} and ${primaryAnimal} ${isLast ? 'sit peacefully beside each other in' : 'walk side-by-side through'} ${placeName}${eventName ? ` during the ${eventName}` : ''}, holding the ${primaryObj}, framed in 9:16 vertical view.`;
+
+    const fullPromptText = `🎬 VIDEO ${idx} — ${isFirst ? 'BEGINNING' : isLast ? 'ENDING' : 'CONTINUATION'} (10 SECONDS)
+
+[DURATION]: 10 seconds${!isFirst ? ` (Direct continuous match-cut from Video ${idx - 1})` : ''}
 [ASPECT RATIO]: 9:16 vertical video format (1080x1920 portrait composition)
-[VISUAL STYLE]: Whimsical hand-painted Japanese animation aesthetic inspired by classic fantasy animation. Original characters and original environment. Soft watercolor backgrounds, rich painterly detail, warm storytelling atmosphere.
+[VISUAL STYLE]: Whimsical hand-painted Japanese animation aesthetic. Soft watercolor backgrounds, rich painterly detail, warm storytelling atmosphere.
 
-[CHARACTER LOCK]: ${charName}, ${charLockData.age}, wearing ${charLockData.clothing}. Hair: ${charLockData.hairAndFace}.
-[ANIMAL LOCK]: ${animNames} (${animLockData.appearance}).
-[ENVIRONMENT LOCK]: ${placeName} (${envLockData.details}). Time: ${timeName}. Weather: ${weatherName}. Palette: ${envLockData.palette}.
-[PROP LOCK]: ${primaryObj} (${objDesc}).
+[STRICT CHARACTER & PROP CONTINUITY]:
+- CHARACTER LOCK: ${charName}, ${charLockData.age}, wearing ${charLockData.clothing}. Hair: ${charLockData.hairAndFace}.
+- ANIMAL LOCK: ${animNames} (${animLockData.appearance}).
+- PROP LOCK: ${primaryObj} (${objDesc}).
+- ENVIRONMENT: ${placeName}${eventName ? ` (${eventName})` : ''}. Time: ${timeName}. Weather: ${weatherName}. Palette: ${envLockData.palette}.
+
+${motionLockVector}
 
 [SCENE SETUP & ACTION]:
-00:00 - 00:04: 9:16 vertical ${chosenCamera.toLowerCase()} as the ${charName} walks through ${placeName} carrying the ${primaryObj}. Lighting: ${chosenLighting}. The ${charName} pauses as a subtle rustling sound catches their attention.
-00:04 - 00:10: Gentle dolly-in as the ${charName} spots the ${primaryAnimal} resting near a mossy tree root. The ${charName} kneels down gently and holds out the ${primaryObj}. The ${primaryAnimal} tilts its head curiously and steps closer.
+00:00 - 00:04: 9:16 vertical ${chosenCamera.toLowerCase()} as the ${charName} ${isFirst ? `travels through ${placeName} holding the ${primaryObj}` : `continues walking seamlessly with the ${primaryAnimal}`}. Lighting: ${chosenLighting}.
+00:04 - 00:10: ${isLast ? `The ${charName} and ${primaryAnimal} settle peacefully beside each other, setting down the ${primaryObj} as night fireflies drift gently.` : `The ${primaryAnimal} leads the way forward down a sunlit path while the ${charName} follows with smooth, fluid movement.`}
 
-[CAMERA & LIGHTING]: 9:16 vertical composition. ${chosenCamera}. ${chosenLighting}.
+[CAMERA & LIGHTING]: 9:16 vertical composition. ${chosenCamera}. ${chosenLighting}. Zero camera jitter or abrupt focal pops.
 
-[ASMR AUDIO & SOUNDSCAPE]: Immersive natural ASMR soundscape with realistic environmental audio and subtle close-up Foley. Crisp footsteps on mossy ground, gentle cloth movement, soft wind through leaves, distant woodland bird chirps, quiet breath of the ${primaryAnimal}. NO narration. NO dialogue. NO music.
+[ASMR AUDIO & SOUNDSCAPE]: Immersive natural ASMR soundscape with realistic environmental audio and subtle close-up Foley. Crisp footsteps, soft cloth rustle, wind through foliage, gentle animal breath. NO narration. NO dialogue. NO music.
 
-[CONTINUITY ANCHOR]: ${scene1EndFrame}`;
+[CONTINUITY ANCHOR]: ${endFrameAnchor}`;
 
-  const scene1: ScenePrompt = {
-    sceneNumber: 1,
-    title: 'Scene 01 — Beginning',
-    subtitle: 'Discovery & Meeting',
-    duration: '10 seconds',
-    aspectRatio: '9:16 vertical format',
-    sceneDescription: `The ${charName} travels through ${placeName} holding the ${primaryObj} and notices the ${primaryAnimal} for the first time.`,
-    characterAction: `The ${charName} gently kneels and offers the ${primaryObj} toward the ${primaryAnimal}.`,
-    cameraDirection: `9:16 vertical ${chosenCamera.toLowerCase()}.`,
-    lightingAndAtmosphere: chosenLighting,
-    animationStyle: 'Whimsical hand-painted Japanese animation style with rich watercolor textures in 9:16 vertical composition.',
-    asmrSoundscape: 'Subtle footsteps on leaves, cloth rustle, quiet animal breath, gentle breeze. NO music.',
-    continuityAnchor: scene1EndFrame,
-    fullPromptText: scene1PromptText,
-  };
+    scenes.push({
+      sceneNumber: idx,
+      title: sceneTitle,
+      subtitle: sceneSubtitle,
+      duration: '10 seconds',
+      aspectRatio: '9:16 vertical format',
+      sceneDescription: `Scene 0${idx} of ${targetCount}: ${charName} and ${primaryAnimal} in ${placeName}${eventName ? ` (${eventName})` : ''}.`,
+      characterAction: isLast ? `Rests beside ${primaryAnimal}` : `Walks steadily with ${primaryAnimal}`,
+      cameraDirection: `9:16 vertical ${chosenCamera.toLowerCase()}`,
+      lightingAndAtmosphere: chosenLighting,
+      animationStyle: 'Whimsical hand-painted Japanese animation style in 9:16 vertical composition with zero-jerk motion locks.',
+      asmrSoundscape: 'Subtle footsteps, cloth rustle, quiet animal breath, gentle breeze. NO music.',
+      continuityAnchor: endFrameAnchor,
+      motionLockVector,
+      fullPromptText,
+    });
+  }
 
-  const scene2EndFrame = `FINAL FRAME SCENE 2: The ${charName} and ${primaryAnimal} stand side-by-side at the edge of a hidden glade in ${placeName}, gazing together toward a glowing natural sanctuary in 9:16 vertical frame.`;
-  const scene2PromptText = `🎬 VIDEO 2 — CONTINUATION (10 SECONDS)
+  // Generate YouTube Shorts Metadata
+  const youtubeTitle = `Anime ASMR | Cozy ${moodName} ${eventName || placeName} with ${primaryAnimal} in Ghibli Style #Shorts`;
+  const youtubeDescription = `Step into a whimsical Studio Ghibli inspired 9:16 vertical ASMR journey. Follow ${charName} and a gentle ${primaryAnimal} carrying a ${primaryObj} through a ${moodName.toLowerCase()} ${placeName.toLowerCase()}${eventName ? ` during a ${eventName.toLowerCase()}` : ''}.
 
-[DURATION]: 10 seconds (Direct continuation from Video 1)
-[ASPECT RATIO]: 9:16 vertical video format (1080x1920 portrait composition)
-[VISUAL STYLE]: Whimsical hand-painted Japanese animation aesthetic. Identical visual style, color grading, and line-art texture as Video 1.
+🌿 Relax with natural environmental Foley audio, soft footsteps, rustling foliage, and calm atmospheric visuals. No music, no dialogue.
 
-[STRICT CONTINUITY LOCK]:
-- FIRST FRAME MUST MATCH EXACTLY THE FINAL FRAME OF VIDEO 1: The ${charName} kneeling beside the ${primaryAnimal} holding the ${primaryObj} in 9:16 portrait.
-- EXACT SAME CHARACTER: ${charName} wearing ${charLockData.clothing}.
-- EXACT SAME ANIMAL: ${primaryAnimal} (${animLockData.appearance}).
-- EXACT SAME ENVIRONMENT: ${placeName}. Same time of day (${timeName}), same lighting, same weather (${weatherName}).
+🎬 Sequential Video Prompts generated for 10-second AI video creation.`;
 
-[SCENE SETUP & ACTION]:
-00:00 - 00:04: The ${primaryAnimal} stands up, turns around with a playful head glance, and trots ahead down a narrow sunlit trail in ${placeName}. The ${charName} stands up gracefully, holding the ${primaryObj}, and follows closely.
-00:04 - 00:10: Smooth medium 9:16 vertical tracking shot following them as they walk together deeper into ${placeName}. They emerge into a hidden clearing where ancient wooden arches and glowing wildflowers open up.
+  const timestamps = scenes.map((s, i) => ({
+    time: `00:${(i * 10).toString().padStart(2, '0')}`,
+    label: `Scene 0${i + 1}: ${s.subtitle}`,
+  }));
 
-[CAMERA & LIGHTING]: 9:16 vertical composition. ${chosenCamera}. Continuous ${chosenLighting}.
+  const hashtags = [
+    '#StudioGhibli',
+    '#AnimeASMR',
+    '#AIAnimation',
+    '#Shorts',
+    '#GhibliAesthetic',
+    '#VisualASMR',
+    '#VerticalVideo',
+  ];
 
-[ASMR AUDIO & SOUNDSCAPE]: Immersive natural ASMR soundscape with realistic environmental audio and subtle close-up Foley. Soft rustle of grass underfoot, light metallic/wood sound from ${primaryObj}, gentle animal footsteps, atmospheric ambient wind. NO narration. NO dialogue. NO music.
+  const fullCopyText = `${youtubeTitle}
 
-[CONTINUITY ANCHOR]: ${scene2EndFrame}`;
+${youtubeDescription}
 
-  const scene2: ScenePrompt = {
-    sceneNumber: 2,
-    title: 'Scene 02 — Continuation',
-    subtitle: 'The Shared Journey',
-    duration: '10 seconds',
-    aspectRatio: '9:16 vertical format',
-    sceneDescription: `Direct continuation from Scene 1. The ${primaryAnimal} leads the ${charName} deeper into ${placeName} toward a hidden clearing.`,
-    characterAction: `The ${charName} follows the ${primaryAnimal} through the environment while keeping the ${primaryObj} held steadily.`,
-    cameraDirection: `Smooth 9:16 vertical tracking shot side-by-side with character movement.`,
-    lightingAndAtmosphere: chosenLighting,
-    animationStyle: 'Identical hand-painted Japanese animation style with seamless visual continuity in 9:16 format.',
-    asmrSoundscape: 'Rhythmic footsteps on soft earth, gentle rustle of clothes, wind through tall grass. NO music.',
-    continuityAnchor: scene2EndFrame,
-    fullPromptText: scene2PromptText,
-  };
+⏱️ CHAPTER TIMESTAMPS:
+${timestamps.map(t => `${t.time} - ${t.label}`).join('\n')}
 
-  const scene3EndFrame = `FINAL FRAME SCENE 3: A calm, breathtaking 9:16 vertical wide shot of the ${charName} sitting peacefully beside the ${primaryAnimal} in ${placeName} under the ${timeName} sky, as the camera slowly pulls back into lingering tranquility.`;
-  const scene3PromptText = `🎬 VIDEO 3 — ENDING (10 SECONDS)
+🏷️ HASHTAGS:
+${hashtags.join(' ')}`;
 
-[DURATION]: 10 seconds (Direct continuation from Video 2)
-[ASPECT RATIO]: 9:16 vertical video format (1080x1920 portrait composition)
-[VISUAL STYLE]: Whimsical hand-painted Japanese animation aesthetic. Complete visual harmony with Videos 1 and 2.
-
-[STRICT CONTINUITY LOCK]:
-- FIRST FRAME MUST MATCH EXACTLY THE FINAL FRAME OF VIDEO 2: Standing at the edge of the hidden clearing in ${placeName} in 9:16 vertical view.
-- EXACT SAME CHARACTER: ${charName} wearing ${charLockData.clothing}.
-- EXACT SAME ANIMAL: ${primaryAnimal} (${animLockData.appearance}).
-- EXACT SAME ENVIRONMENT & PROPS: ${placeName}, ${primaryObj} set down on mossy ground.
-
-[SCENE SETUP & ACTION]:
-00:00 - 00:05: The ${charName} sits down comfortably on a carpet of moss beside the ${primaryAnimal}. The ${primaryObj} is set gently on the ground, radiating a warm peaceful amber glow. The ${primaryAnimal} curled up beside them, resting its head gently.
-00:05 - 00:10: Slow cinematic vertical 9:16 crane/dolly-out shot pulling back to reveal the surrounding ${placeName} as evening fireflies drift through the warm ${timeName} atmosphere. A peaceful, wholesome, emotional resolution.
-
-[CAMERA & LIGHTING]: 9:16 vertical composition. ${chosenCamera} pulling away into a wide panoramic frame. ${chosenLighting}.
-
-[ASMR AUDIO & SOUNDSCAPE]: Immersive natural ASMR soundscape with realistic environmental audio and subtle close-up Foley. Quiet evening insects, soft crackle or hum of ${primaryObj}, gentle night breeze through leaves, peaceful lingering nature ambience. NO narration. NO dialogue. NO music.
-
-[CONTINUITY ANCHOR]: ${scene3EndFrame}`;
-
-  const scene3: ScenePrompt = {
-    sceneNumber: 3,
-    title: 'Scene 03 — Ending',
-    subtitle: 'Peaceful Resolution',
-    duration: '10 seconds',
-    aspectRatio: '9:16 vertical format',
-    sceneDescription: `Direct continuation from Scene 2. The ${charName} and ${primaryAnimal} rest together in the clearing as night falls softly.`,
-    characterAction: `The ${charName} rests beside the ${primaryAnimal} while setting down the ${primaryObj}.`,
-    cameraDirection: `Slow smooth 9:16 vertical ${chosenCamera.toLowerCase()}.`,
-    lightingAndAtmosphere: chosenLighting,
-    animationStyle: 'Whimsical hand-painted Japanese animation aesthetic ending on a picturesque 9:16 vertical frame.',
-    asmrSoundscape: 'Calm night breeze, evening crickets, quiet breath, gentle ASMR environment. NO music.',
-    continuityAnchor: scene3EndFrame,
-    fullPromptText: scene3PromptText,
+  const youtubeMetadata: YouTubeMetadata = {
+    title: youtubeTitle,
+    description: youtubeDescription,
+    timestamps,
+    hashtags,
+    fullCopyText,
   };
 
   return {
@@ -321,9 +314,11 @@ export const generateStory = (selections: UserSelections): GenerationResult => {
     timestamp: Date.now(),
     selections,
     bible,
-    scene1,
-    scene2,
-    scene3,
+    scenes,
+    scene1: scenes[0],
+    scene2: scenes[1] || scenes[0],
+    scene3: scenes[2] || scenes[scenes.length - 1],
     negativePrompt: DEFAULT_NEGATIVE_PROMPT,
+    youtubeMetadata,
   };
 };

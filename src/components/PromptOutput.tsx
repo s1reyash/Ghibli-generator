@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import type { GenerationResult, ScenePrompt } from '../types/generator';
 import { SceneAnimationDeck } from './SceneAnimationDeck';
-import { Copy, Check, Film, ShieldAlert, Sparkles, Clock, Volume2, Anchor, ShieldCheck, Download, Smartphone, Bookmark } from 'lucide-react';
+import { YouTubeMetadataCard } from './YouTubeMetadataCard';
+import { Copy, Check, Film, ShieldAlert, Sparkles, Clock, Volume2, Anchor, ShieldCheck, Download, Smartphone, Bookmark, Zap } from 'lucide-react';
 
 interface PromptOutputProps {
   result: GenerationResult;
@@ -18,6 +19,8 @@ export const PromptOutput: React.FC<PromptOutputProps> = ({
   const [copiedAll, setCopiedAll] = useState<boolean>(false);
   const [copiedNegative, setCopiedNegative] = useState<boolean>(false);
   const [isSaved, setIsSaved] = useState<boolean>(false);
+
+  const scenesList = result.scenes && result.scenes.length > 0 ? result.scenes : [result.scene1, result.scene2, result.scene3].filter(Boolean);
 
   const copyToClipboard = async (text: string, type: 'scene' | 'all' | 'negative', sceneNum?: number) => {
     try {
@@ -56,14 +59,7 @@ export const PromptOutput: React.FC<PromptOutputProps> = ({
   const allPromptsText = `📖 STORY: ${result.bible.title}
 CONCEPT: ${result.bible.conceptSummary}
 
-==================================================
-${result.scene1.fullPromptText}
-
-==================================================
-${result.scene2.fullPromptText}
-
-==================================================
-${result.scene3.fullPromptText}
+${scenesList.map(s => `==================================================\n${s.fullPromptText}`).join('\n\n')}
 
 ==================================================
 🚫 NEGATIVE PROMPT:
@@ -89,7 +85,7 @@ ${result.negativePrompt}`;
           <div>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#EAE8E0] text-[11px] font-bold text-[#3E5A47] uppercase tracking-wider mb-1.5">
               <Sparkles className="w-3 h-3 text-amber-600" />
-              9:16 Vertical Ghibli Story Bible
+              9:16 Vertical Story Bible ({scenesList.length} Sequential Scenes)
             </div>
             <h2 className="text-2xl md:text-3xl font-serif font-bold text-[#111827]">
               {result.bible.title}
@@ -162,27 +158,35 @@ ${result.negativePrompt}`;
         </div>
       </div>
 
-      {/* 3 Scene Prompt Cards */}
+      {/* Auto-Generated YouTube Shorts Description Card */}
+      {result.youtubeMetadata && (
+        <YouTubeMetadataCard metadata={result.youtubeMetadata} />
+      )}
+
+      {/* Dynamic N Scene Prompt Cards */}
       <div className="space-y-6">
-        {[result.scene1, result.scene2, result.scene3].map((scene: ScenePrompt) => {
+        {scenesList.map((scene: ScenePrompt, index: number) => {
           const isCopied = copiedScene === scene.sceneNumber;
 
           return (
             <div
-              key={scene.sceneNumber}
+              key={scene.sceneNumber || index}
               className="bg-white rounded-3xl border border-[#E2E0D8] p-5 md:p-6 shadow-sm space-y-4"
             >
               {/* Header */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 pb-3 border-b border-[#E2E0D8]">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="px-3 py-1 rounded-lg text-xs font-bold bg-[#EAE8E0] text-[#111827] border border-[#D8D5C8]">
-                    🎬 Scene 0{scene.sceneNumber} — {scene.sceneNumber === 1 ? 'Beginning' : scene.sceneNumber === 2 ? 'Continuation' : 'Ending'}
+                    🎬 Scene 0{scene.sceneNumber} — {scene.title}
                   </span>
                   <span className="text-xs text-[#6B7280] flex items-center gap-1 font-semibold">
                     <Clock className="w-3.5 h-3.5 text-amber-600" /> 10 Seconds
                   </span>
                   <span className="text-xs text-[#3E5A47] bg-[#EAE8E0] px-2 py-0.5 rounded-md font-bold flex items-center gap-1">
                     <Smartphone className="w-3 h-3" /> 9:16 Vertical
+                  </span>
+                  <span className="text-xs text-[#DC2626] bg-[#DC2626]/10 px-2 py-0.5 rounded-md font-bold flex items-center gap-1">
+                    <Zap className="w-3 h-3" /> Zero-Jerk Lock
                   </span>
                 </div>
 
@@ -214,7 +218,7 @@ ${result.negativePrompt}`;
 
               {/* Live Animated Canvas Deck */}
               <SceneAnimationDeck
-                sceneNumber={scene.sceneNumber}
+                sceneNumber={(scene.sceneNumber > 3 ? 3 : scene.sceneNumber) as 1 | 2 | 3}
                 weather={result.bible.environmentLock.weather}
                 timeOfDay={result.bible.environmentLock.timeOfDay}
               />

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import type { UserSelections } from '../types/generator';
-import { CHARACTERS, ANIMALS, OBJECTS, PLACES, MOODS, TIMES, WEATHER } from '../data/presets';
+import { CHARACTERS, ANIMALS, OBJECTS, PLACES, EVENTS, MOODS, TIMES, WEATHER } from '../data/presets';
 import { QUICK_TEMPLATES } from '../data/quickTemplates';
 import type { QuickTemplate } from '../data/quickTemplates';
 import { CameraLightingMatrix } from './CameraLightingMatrix';
-import { User, Feather, Package, MapPin, Sparkles, Sun, Check, Wand2, Sliders } from 'lucide-react';
+import { User, Feather, Package, MapPin, Sparkles, Sun, Check, Wand2, Sliders, Calendar, Film } from 'lucide-react';
 
 interface CategorySelectorProps {
   selections: UserSelections;
@@ -12,7 +12,7 @@ interface CategorySelectorProps {
   onSelectTemplate: (template: QuickTemplate) => void;
 }
 
-type TabType = 'character' | 'animal' | 'object' | 'place' | 'matrix' | 'mood' | 'environment';
+type TabType = 'character' | 'animal' | 'object' | 'place' | 'event' | 'matrix' | 'mood' | 'environment';
 
 export const CategorySelector: React.FC<CategorySelectorProps> = ({
   selections,
@@ -30,26 +30,54 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
     }
   };
 
+  const currentCount = selections.sceneCount || 3;
+
   return (
     <div className="w-full max-w-4xl mx-auto space-y-4 my-4">
 
-      {/* Quick 1-Click Story Templates Bar */}
-      <div className="bg-white border border-[#E2E0D8] rounded-2xl p-3.5 shadow-xs">
-        <div className="text-xs font-bold text-[#111827] uppercase tracking-wider mb-2 flex items-center gap-1.5 font-serif">
-          <Wand2 className="w-3.5 h-3.5 text-amber-600" />
-          <span>Quick 1-Click Story Recipes (絵コンテ レシピ):</span>
+      {/* Dynamic Prompt Count Selector (1 to 5 Scenes) & Quick Recipes */}
+      <div className="bg-white border border-[#E2E0D8] rounded-2xl p-4 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        {/* Number of Prompts Pill Selector */}
+        <div className="space-y-1">
+          <div className="text-xs font-bold text-[#111827] uppercase tracking-wider flex items-center gap-1.5 font-serif">
+            <Film className="w-4 h-4 text-[#15803D]" />
+            <span>Number of Sequential Prompts:</span>
+          </div>
+          <div className="inline-flex items-center gap-1 bg-[#F2F0E8] p-1 rounded-xl border border-[#E2E0D8]">
+            {[1, 2, 3, 4, 5].map(num => (
+              <button
+                key={num}
+                onClick={() => onChange({ sceneCount: num })}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                  currentCount === num
+                    ? 'bg-[#111827] text-white shadow-xs'
+                    : 'text-[#4B5563] hover:bg-[#EAE8E0]'
+                }`}
+              >
+                {num} {num === 1 ? 'Scene (10s)' : 'Scenes'}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {QUICK_TEMPLATES.map(tpl => (
-            <button
-              key={tpl.id}
-              onClick={() => onSelectTemplate(tpl)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#E2E0D8] bg-[#FAF9F6] text-xs font-semibold text-[#111827] hover:border-[#111827] hover:bg-[#111827] hover:text-white transition cursor-pointer"
-            >
-              <span>{tpl.emoji}</span>
-              <span>{tpl.title}</span>
-            </button>
-          ))}
+
+        {/* Quick Recipes */}
+        <div className="space-y-1 w-full md:w-auto">
+          <div className="text-xs font-bold text-[#111827] uppercase tracking-wider flex items-center gap-1.5 font-serif">
+            <Wand2 className="w-3.5 h-3.5 text-amber-600" />
+            <span>Quick 1-Click Story Recipes:</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {QUICK_TEMPLATES.slice(0, 4).map(tpl => (
+              <button
+                key={tpl.id}
+                onClick={() => onSelectTemplate(tpl)}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#E2E0D8] bg-[#FAF9F6] text-[11px] font-semibold text-[#111827] hover:bg-[#111827] hover:text-white transition cursor-pointer"
+              >
+                <span>{tpl.emoji}</span>
+                <span>{tpl.title}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -60,7 +88,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
         <div className="flex flex-wrap items-center justify-between gap-1 p-1 bg-[#F2F0E8] rounded-2xl mb-5 border border-[#E2E0D8]">
           <button
             onClick={() => setActiveTab('character')}
-            className={`flex-1 min-w-[100px] flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs md:text-sm font-semibold transition cursor-pointer ${
+            className={`flex-1 min-w-[90px] flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs md:text-sm font-semibold transition cursor-pointer ${
               activeTab === 'character'
                 ? 'bg-[#111827] text-white shadow-xs'
                 : 'text-[#4B5563] hover:text-[#111827]'
@@ -72,7 +100,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
 
           <button
             onClick={() => setActiveTab('animal')}
-            className={`flex-1 min-w-[100px] flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs md:text-sm font-semibold transition cursor-pointer ${
+            className={`flex-1 min-w-[90px] flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs md:text-sm font-semibold transition cursor-pointer ${
               activeTab === 'animal'
                 ? 'bg-[#111827] text-white shadow-xs'
                 : 'text-[#4B5563] hover:text-[#111827]'
@@ -84,7 +112,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
 
           <button
             onClick={() => setActiveTab('object')}
-            className={`flex-1 min-w-[100px] flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs md:text-sm font-semibold transition cursor-pointer ${
+            className={`flex-1 min-w-[90px] flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs md:text-sm font-semibold transition cursor-pointer ${
               activeTab === 'object'
                 ? 'bg-[#111827] text-white shadow-xs'
                 : 'text-[#4B5563] hover:text-[#111827]'
@@ -96,7 +124,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
 
           <button
             onClick={() => setActiveTab('place')}
-            className={`flex-1 min-w-[100px] flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs md:text-sm font-semibold transition cursor-pointer ${
+            className={`flex-1 min-w-[80px] flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs md:text-sm font-semibold transition cursor-pointer ${
               activeTab === 'place'
                 ? 'bg-[#111827] text-white shadow-xs'
                 : 'text-[#4B5563] hover:text-[#111827]'
@@ -107,8 +135,20 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
           </button>
 
           <button
+            onClick={() => setActiveTab('event')}
+            className={`flex-1 min-w-[100px] flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs md:text-sm font-bold transition cursor-pointer ${
+              activeTab === 'event'
+                ? 'bg-[#15803D] text-white shadow-xs'
+                : 'text-[#15803D] hover:bg-[#15803D]/10'
+            }`}
+          >
+            <Calendar className="w-3.5 h-3.5" />
+            <span>Events & Scenarios</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('matrix')}
-            className={`flex-1 min-w-[120px] flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs md:text-sm font-bold transition cursor-pointer ${
+            className={`flex-1 min-w-[110px] flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs md:text-sm font-bold transition cursor-pointer ${
               activeTab === 'matrix'
                 ? 'bg-[#DC2626] text-white shadow-xs'
                 : 'text-[#DC2626] hover:bg-[#DC2626]/10'
@@ -120,7 +160,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
 
           <button
             onClick={() => setActiveTab('mood')}
-            className={`flex-1 min-w-[80px] flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs md:text-sm font-semibold transition cursor-pointer ${
+            className={`flex-1 min-w-[70px] flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs md:text-sm font-semibold transition cursor-pointer ${
               activeTab === 'mood'
                 ? 'bg-[#111827] text-white shadow-xs'
                 : 'text-[#4B5563] hover:text-[#111827]'
@@ -132,7 +172,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
 
           <button
             onClick={() => setActiveTab('environment')}
-            className={`flex-1 min-w-[110px] flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs md:text-sm font-semibold transition cursor-pointer ${
+            className={`flex-1 min-w-[100px] flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs md:text-sm font-semibold transition cursor-pointer ${
               activeTab === 'environment'
                 ? 'bg-[#111827] text-white shadow-xs'
                 : 'text-[#4B5563] hover:text-[#111827]'
@@ -296,6 +336,46 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
           </div>
         )}
 
+        {activeTab === 'event' && (
+          <div className="space-y-4 animate-fade-in">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-bold text-[#111827]">Select Event / Scenario Context:</span>
+              <span className="text-[#6B7280]">Adds narrative setting (e.g. Road Trip, College)</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
+              {EVENTS.map(item => {
+                const isSelected = selections.event === item.name;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => onChange({ event: isSelected ? '' : item.name })}
+                    className={`p-3 rounded-xl border text-left text-xs transition cursor-pointer ${
+                      isSelected
+                        ? 'bg-[#15803D] text-white border-[#15803D] font-bold shadow-xs'
+                        : 'bg-[#FAF9F6] border-[#E2E0D8] text-[#374151] hover:border-[#15803D]'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold">{item.emoji} {item.name}</span>
+                      {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
+                    </div>
+                    <div className="text-[10px] opacity-80 mt-1">{item.description}</div>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="pt-2 border-t border-[#E2E0D8]">
+              <input
+                type="text"
+                value={selections.customEvent || ''}
+                onChange={e => onChange({ customEvent: e.target.value, event: '' })}
+                placeholder="Or enter custom event (e.g. Midnight train ride, College graduation day)..."
+                className="w-full px-3.5 py-2 rounded-xl border border-[#E2E0D8] bg-[#FAF9F6] text-xs text-[#111827] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#111827]"
+              />
+            </div>
+          </div>
+        )}
+
         {activeTab === 'matrix' && (
           <div className="animate-fade-in">
             <CameraLightingMatrix
@@ -310,7 +390,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
         {activeTab === 'mood' && (
           <div className="space-y-4 animate-fade-in">
             <div className="text-xs font-bold text-[#111827]">Atmospheric Mood:</div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
               {MOODS.map(item => {
                 const isSelected = selections.mood === item.name;
                 return (
@@ -384,6 +464,9 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
         {/* World Ingredients Pill Summary */}
         <div className="mt-4 pt-3 border-t border-[#E2E0D8] flex flex-wrap items-center gap-1.5 text-xs text-[#4B5563]">
           <span className="font-bold text-[#111827]">Storyboard Settings:</span>
+          <span className="px-2 py-0.5 rounded-md bg-[#F2F0E8] border border-[#E2E0D8] text-[#111827] font-bold">
+            🎬 {currentCount} {currentCount === 1 ? 'Scene' : 'Scenes'}
+          </span>
           <span className="px-2 py-0.5 rounded-md bg-[#F2F0E8] border border-[#E2E0D8] text-[#111827]">
             👤 {selections.customCharacter || selections.character || 'Girl'}
           </span>
@@ -396,6 +479,11 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
           <span className="px-2 py-0.5 rounded-md bg-[#F2F0E8] border border-[#E2E0D8] text-[#111827]">
             🌲 {selections.customPlace || selections.place || 'Enchanted Forest'}
           </span>
+          {(selections.event || selections.customEvent) && (
+            <span className="px-2 py-0.5 rounded-md bg-emerald-100 border border-emerald-300 text-emerald-900 font-semibold">
+              🚗 Event: {selections.customEvent || selections.event}
+            </span>
+          )}
           {selections.cameraStyle && (
             <span className="px-2 py-0.5 rounded-md bg-[#DC2626]/10 border border-[#DC2626]/30 text-[#DC2626] font-semibold">
               🎥 {selections.cameraStyle}

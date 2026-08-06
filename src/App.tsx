@@ -11,9 +11,33 @@ import { GenerateControls } from './components/GenerateControls';
 import { PromptOutput } from './components/PromptOutput';
 import { PromptVerifierModal } from './components/PromptVerifierModal';
 import { DirectorsVault } from './components/DirectorsVault';
+import { LoginPage } from './components/LoginPage';
 import { Footer } from './components/Footer';
 
 export const App: React.FC = () => {
+  // Authentication State
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    try {
+      const session = localStorage.getItem('ghibli_auth_session');
+      return !!session;
+    } catch {
+      return false;
+    }
+  });
+
+  const [username, setUsername] = useState<string>(() => {
+    try {
+      const session = localStorage.getItem('ghibli_auth_session');
+      if (session) {
+        const parsed = JSON.parse(session);
+        return parsed.username || 'Studio Director';
+      }
+    } catch {
+      // ignore
+    }
+    return 'Studio Director';
+  });
+
   // Theme State with localStorage memory
   const [theme, setTheme] = useState<ThemeMode>(() => {
     const saved = localStorage.getItem('ghibli_theme');
@@ -29,11 +53,14 @@ export const App: React.FC = () => {
     customObject: '',
     place: 'Enchanted Forest',
     customPlace: '',
+    event: '',
+    customEvent: '',
     mood: 'Peaceful',
     time: '',
     weather: '',
     cameraStyle: '',
     lightingStyle: '',
+    sceneCount: 3,
   });
 
   const [result, setResult] = useState<GenerationResult | null>(null);
@@ -45,6 +72,16 @@ export const App: React.FC = () => {
   const [vaultOpen, setVaultOpen] = useState<boolean>(false);
 
   const outputRef = useRef<HTMLDivElement | null>(null);
+
+  const handleLoginSuccess = (name: string) => {
+    setUsername(name);
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('ghibli_auth_session');
+    setIsAuthenticated(false);
+  };
 
   const handleSelectTheme = (newTheme: ThemeMode) => {
     setTheme(newTheme);
@@ -131,7 +168,7 @@ export const App: React.FC = () => {
   };
 
   const handleOpenGeneralVerifier = () => {
-    const textToVerify = result ? result.scene1.fullPromptText : '';
+    const textToVerify = result ? (result.scenes ? result.scenes[0].fullPromptText : result.scene1.fullPromptText) : '';
     setVerifierPromptText(textToVerify);
     setVerifierOpen(true);
   };
@@ -147,14 +184,20 @@ export const App: React.FC = () => {
     }, 100);
   };
 
+  if (!isAuthenticated) {
+    return <LoginPage onLoginSuccess={handleLoginSuccess} />;
+  }
+
   return (
     <div className={`theme-${theme} min-h-screen relative flex flex-col justify-between selection:bg-[#111827] selection:text-white transition-colors duration-300`}>
       {/* Dual Atmosphere Particle & Cursor Trail Background */}
       <DualAtmosphereBackground />
 
       <main className="relative z-10 container mx-auto px-4 pb-16">
-        {/* Header */}
+        {/* Header with Security Logout */}
         <Header
+          username={username}
+          onLogout={handleLogout}
           onOpenVerifier={handleOpenGeneralVerifier}
           onOpenVault={() => setVaultOpen(true)}
           currentTheme={theme}

@@ -1,9 +1,11 @@
 import React from 'react';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import type { ThemeMode } from './ThemeSwitcher';
-import { Sparkles, ShieldCheck, Bookmark, Compass } from 'lucide-react';
+import { Sparkles, ShieldCheck, Bookmark, Compass, LogOut } from 'lucide-react';
 
 interface HeaderProps {
+  username?: string;
+  onLogout?: () => void;
   onOpenVerifier: () => void;
   onOpenVault: () => void;
   currentTheme: ThemeMode;
@@ -11,6 +13,8 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
+  username = 'Director',
+  onLogout,
   onOpenVerifier,
   onOpenVault,
   currentTheme,
@@ -21,7 +25,7 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Kanji Director's Badge */}
       <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#111827] text-white border border-[#D97706]/40 text-xs font-bold tracking-wider mb-3 shadow-md">
         <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-        <span>ジブリ・絵コンテ DECK — Studio Ghibli Storyboard Studio</span>
+        <span>ジブリ・絵コンテ DECK — Authenticated Workbench ({username})</span>
         <Compass className="w-3.5 h-3.5 text-amber-400" />
       </div>
 
@@ -32,7 +36,7 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Subtitle */}
       <p className="text-sm md:text-base text-[#4B5563] font-medium max-w-lg mx-auto leading-relaxed">
-        Create magical 30-second 9:16 vertical video stories, one scene at a time.
+        Create magical sequential 9:16 vertical video stories with zero-jerk motion locks.
       </p>
 
       {/* Utility Action Bar */}
@@ -62,6 +66,18 @@ export const Header: React.FC<HeaderProps> = ({
           <Bookmark className="w-4 h-4" />
           <span>Director's Vault</span>
         </button>
+
+        {/* Logout / Lock Desk Button */}
+        {onLogout && (
+          <button
+            onClick={onLogout}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition cursor-pointer"
+            title="Lock Studio Desk and Sign Out"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Lock Desk</span>
+          </button>
+        )}
       </div>
 
       {/* Step Indicator Bar */}
@@ -73,12 +89,12 @@ export const Header: React.FC<HeaderProps> = ({
         <span className="text-[#CCC]">→</span>
         <span className="flex items-center gap-1.5 font-bold text-[#111827]">
           <span className="w-4 h-4 rounded-full bg-[#EAE8E0] text-[#111827] flex items-center justify-center text-[10px]">2</span>
-          Matrix Tuning
+          Matrix & Scene Count
         </span>
         <span className="text-[#CCC]">→</span>
         <span className="flex items-center gap-1.5 font-bold text-[#111827]">
           <span className="w-4 h-4 rounded-full bg-[#EAE8E0] text-[#111827] flex items-center justify-center text-[10px]">3</span>
-          Generate 3-Scene Story
+          Generate & YouTube Export
         </span>
       </div>
     </header>
