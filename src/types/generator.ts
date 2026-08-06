@@ -16,6 +16,8 @@ export interface UserSelections {
   customPlace: string;
   event?: string;
   customEvent?: string;
+  moralLesson?: string;
+  customMoralLesson?: string;
   mood: string;
   time: string;
   weather: string;
@@ -27,6 +29,7 @@ export interface UserSelections {
 export interface StoryBible {
   title: string;
   conceptSummary: string;
+  moralSummary?: string;
   characterLock: {
     name: string;
     appearance: string;
@@ -81,8 +84,9 @@ export interface ScenePrompt {
 export interface YouTubeMetadata {
   title: string;
   description: string;
-  timestamps: { time: string; label: string }[];
   hashtags: string[];
+  allSeoTags: string[];
+  allSeoTagsText: string;
   fullCopyText: string;
 }
 

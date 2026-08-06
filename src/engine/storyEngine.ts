@@ -1,6 +1,7 @@
 import type { UserSelections, GenerationResult, StoryBible, ScenePrompt, YouTubeMetadata } from '../types/generator';
-import { DEFAULT_NEGATIVE_PROMPT, CHARACTERS, ANIMALS, OBJECTS, PLACES, EVENTS, MOODS, TIMES, WEATHER } from '../data/presets';
+import { DEFAULT_NEGATIVE_PROMPT, CHARACTERS, ANIMALS, OBJECTS, PLACES, EVENTS, MORAL_LESSONS, MOODS, TIMES, WEATHER } from '../data/presets';
 import { CAMERA_SHOTS, LIGHTING_STYLES } from '../components/CameraLightingMatrix';
+import { get100SeoTagsFormatted } from '../data/seoTags';
 
 // Helper to pick random element
 const pick = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
@@ -9,7 +10,7 @@ const pick = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 const resolveName = (selected: string, custom: string, defaultFallback: string): string => {
   if (custom && custom.trim().length > 0) return custom.trim();
   if (selected) {
-    const found = [...CHARACTERS, ...ANIMALS, ...OBJECTS, ...PLACES, ...EVENTS, ...MOODS, ...TIMES, ...WEATHER].find(p => p.id === selected);
+    const found = [...CHARACTERS, ...ANIMALS, ...OBJECTS, ...PLACES, ...EVENTS, ...MORAL_LESSONS, ...MOODS, ...TIMES, ...WEATHER].find(p => p.id === selected);
     if (found) return found.name;
     return selected;
   }
@@ -89,6 +90,7 @@ export const generateSurpriseSelections = (): UserSelections => {
   const randomObj = [pick(OBJECTS).name];
   const randomPlace = pick(PLACES).name;
   const randomEvent = pick(EVENTS).name;
+  const randomMoral = pick(MORAL_LESSONS).name;
   const randomMood = pick(MOODS).name;
   const randomTime = pick(TIMES).name;
   const randomWeather = pick(WEATHER).name;
@@ -107,6 +109,8 @@ export const generateSurpriseSelections = (): UserSelections => {
     customPlace: '',
     event: randomEvent,
     customEvent: '',
+    moralLesson: randomMoral,
+    customMoralLesson: '',
     mood: randomMood,
     time: randomTime,
     weather: randomWeather,
@@ -132,6 +136,7 @@ export const generateStory = (selections: UserSelections): GenerationResult => {
 
   const placeName = resolveName(selections.place, selections.customPlace, 'Enchanted Forest');
   const eventName = resolveName(selections.event || '', selections.customEvent || '', '');
+  const moralName = resolveName(selections.moralLesson || '', selections.customMoralLesson || '', '');
   const moodName = selections.mood || 'Peaceful';
 
   const timeName = selections.time || pick(['Golden Hour', 'Late Afternoon', 'Early Morning', 'Sunset', 'Twilight']);
@@ -158,16 +163,19 @@ export const generateStory = (selections: UserSelections): GenerationResult => {
     palette: `natural earthy green, sky blue, warm sunlight highlights, and soft shadow tones`
   };
 
-  const titleTemplates = eventName 
+  const titleTemplates = moralName
+    ? [`The Lesson of ${moralName}`, `Whispers of ${moralName}`, `${charName}'s Journey of ${moralName}`]
+    : eventName 
     ? [`The ${eventName} with ${primaryObj}`, `${charName}'s ${eventName}`, `A ${moodName} ${eventName} in ${placeName}`]
     : [`The ${primaryObj} in the ${placeName}`, `Whispers of the ${placeName}`, `The ${charName} and the ${primaryAnimal}`];
   const storyTitle = pick(titleTemplates);
 
-  const conceptSummary = `In a ${moodName.toLowerCase()} ${placeName.toLowerCase()} during ${timeName.toLowerCase()}${eventName ? ` during a ${eventName.toLowerCase()}` : ''}, a ${charName.toLowerCase()} carrying a ${primaryObj.toLowerCase()} encounters a ${primaryAnimal.toLowerCase()}, forming a quiet bond through a magical ${targetCount}-part 9:16 vertical journey.`;
+  const conceptSummary = `In a ${moodName.toLowerCase()} ${placeName.toLowerCase()} during ${timeName.toLowerCase()}${eventName ? ` (${eventName.toLowerCase()})` : ''}, a ${charName.toLowerCase()} carrying a ${primaryObj.toLowerCase()} encounters a ${primaryAnimal.toLowerCase()}, embarking on a ${targetCount}-part journey${moralName ? ` reflecting the moral truth that "${moralName.toLowerCase()}"` : ''}.`;
 
   const bible: StoryBible = {
     title: storyTitle,
     conceptSummary,
+    moralSummary: moralName ? `Moral Lesson: "${moralName}" — Reminding us that quiet kindness, trust, and gentle patience heal the world.` : undefined,
     characterLock: {
       name: charName,
       appearance: `${charName}, ${charLockData.age}, with ${charLockData.hairAndFace}`,
@@ -216,7 +224,7 @@ export const generateStory = (selections: UserSelections): GenerationResult => {
     const sceneSubtitle = isFirst 
       ? 'Discovery & Meeting' 
       : isLast 
-      ? 'Peaceful Sanctuary' 
+      ? 'Peaceful Sanctuary & Moral Realization' 
       : `Journey Stage 0${idx}`;
 
     // Zero-Jerk Motion Vector Lock
@@ -226,23 +234,27 @@ export const generateStory = (selections: UserSelections): GenerationResult => {
 
     const endFrameAnchor = `FINAL FRAME SCENE 0${idx}: The ${charName} and ${primaryAnimal} ${isLast ? 'sit peacefully beside each other in' : 'walk side-by-side through'} ${placeName}${eventName ? ` during the ${eventName}` : ''}, holding the ${primaryObj}, framed in 9:16 vertical view.`;
 
+    const moralInstruction = moralName
+      ? `\n[MORAL & FABLE THEME LOCK]: Scene embodies the core lesson of "${moralName}". The ${charName}'s gentle actions toward the ${primaryAnimal} express empathy, quiet kindness, and harmony.`
+      : '';
+
     const fullPromptText = `🎬 VIDEO ${idx} — ${isFirst ? 'BEGINNING' : isLast ? 'ENDING' : 'CONTINUATION'} (10 SECONDS)
 
 [DURATION]: 10 seconds${!isFirst ? ` (Direct continuous match-cut from Video ${idx - 1})` : ''}
 [ASPECT RATIO]: 9:16 vertical video format (1080x1920 portrait composition)
-[VISUAL STYLE]: Whimsical hand-painted Japanese animation aesthetic. Soft watercolor backgrounds, rich painterly detail, warm storytelling atmosphere.
+[VISUAL STYLE]: Whimsical hand-painted Japanese animation aesthetic. Soft watercolor backgrounds, rich painterly detail, warm storytelling atmosphere.${moralInstruction}
 
 [STRICT CHARACTER & PROP CONTINUITY]:
 - CHARACTER LOCK: ${charName}, ${charLockData.age}, wearing ${charLockData.clothing}. Hair: ${charLockData.hairAndFace}.
 - ANIMAL LOCK: ${animNames} (${animLockData.appearance}).
 - PROP LOCK: ${primaryObj} (${objDesc}).
-- ENVIRONMENT: ${placeName}${eventName ? ` (${eventName})` : ''}. Time: ${timeName}. Weather: ${weatherName}. Palette: ${envLockData.palette}.
+- ENVIRONMENT: ${placeName}${eventName ? ` (${eventName})` : ''}. Time: ${timeName}. Weather: ${weatherName}. Palette: ${envLockData.palette}.${moralName ? `\n- MORAL THEME: ${moralName}.` : ''}
 
 ${motionLockVector}
 
 [SCENE SETUP & ACTION]:
-00:00 - 00:04: 9:16 vertical ${chosenCamera.toLowerCase()} as the ${charName} ${isFirst ? `travels through ${placeName} holding the ${primaryObj}` : `continues walking seamlessly with the ${primaryAnimal}`}. Lighting: ${chosenLighting}.
-00:04 - 00:10: ${isLast ? `The ${charName} and ${primaryAnimal} settle peacefully beside each other, setting down the ${primaryObj} as night fireflies drift gently.` : `The ${primaryAnimal} leads the way forward down a sunlit path while the ${charName} follows with smooth, fluid movement.`}
+00:00 - 00:04: 9:16 vertical ${chosenCamera.toLowerCase()} as the ${charName} ${isFirst ? `travels through ${placeName} carrying the ${primaryObj}` : `continues walking seamlessly with the ${primaryAnimal}`}. Lighting: ${chosenLighting}.
+00:04 - 00:10: ${isLast ? `The ${charName} and ${primaryAnimal} settle peacefully beside each other, setting down the ${primaryObj} as night fireflies drift gently, expressing quiet gratitude.` : `The ${primaryAnimal} leads the way forward down a sunlit path while the ${charName} follows with smooth, fluid movement.`}
 
 [CAMERA & LIGHTING]: 9:16 vertical composition. ${chosenCamera}. ${chosenLighting}. Zero camera jitter or abrupt focal pops.
 
@@ -268,44 +280,31 @@ ${motionLockVector}
     });
   }
 
-  // Generate YouTube Shorts Metadata
-  const youtubeTitle = `Anime ASMR | Cozy ${moodName} ${eventName || placeName} with ${primaryAnimal} in Ghibli Style #Shorts`;
-  const youtubeDescription = `Step into a whimsical Studio Ghibli inspired 9:16 vertical ASMR journey. Follow ${charName} and a gentle ${primaryAnimal} carrying a ${primaryObj} through a ${moodName.toLowerCase()} ${placeName.toLowerCase()}${eventName ? ` during a ${eventName.toLowerCase()}` : ''}.
+  // Generate YouTube Shorts Metadata & Attach 100 SEO Tags
+  const { hashtags, fullText: allSeoTagsText } = get100SeoTagsFormatted();
+  const youtubeTitle = moralName 
+    ? `Anime ASMR Moral Story | ${moralName} with ${charName} & ${primaryAnimal} #Shorts`
+    : `Anime ASMR | Cozy ${moodName} ${eventName || placeName} with ${primaryAnimal} in Ghibli Style #Shorts`;
+
+  const youtubeDescription = `Step into a whimsical Studio Ghibli inspired 9:16 vertical ASMR journey. Follow ${charName} and a gentle ${primaryAnimal} carrying a ${primaryObj} through a ${moodName.toLowerCase()} ${placeName.toLowerCase()}${eventName ? ` during a ${eventName.toLowerCase()}` : ''}.${moralName ? `\n\n💖 Moral Takeaway: "${moralName}" — Reminding us of the quiet warmth of empathy and small acts of kindness.` : ''}
 
 🌿 Relax with natural environmental Foley audio, soft footsteps, rustling foliage, and calm atmospheric visuals. No music, no dialogue.
 
 🎬 Sequential Video Prompts generated for 10-second AI video creation.`;
 
-  const timestamps = scenes.map((s, i) => ({
-    time: `00:${(i * 10).toString().padStart(2, '0')}`,
-    label: `Scene 0${i + 1}: ${s.subtitle}`,
-  }));
-
-  const hashtags = [
-    '#StudioGhibli',
-    '#AnimeASMR',
-    '#AIAnimation',
-    '#Shorts',
-    '#GhibliAesthetic',
-    '#VisualASMR',
-    '#VerticalVideo',
-  ];
-
   const fullCopyText = `${youtubeTitle}
 
 ${youtubeDescription}
 
-⏱️ CHAPTER TIMESTAMPS:
-${timestamps.map(t => `${t.time} - ${t.label}`).join('\n')}
-
-🏷️ HASHTAGS:
-${hashtags.join(' ')}`;
+🏷️ HASHTAGS & VIRAL SEO TAGS (100 TAGS):
+${allSeoTagsText}`;
 
   const youtubeMetadata: YouTubeMetadata = {
     title: youtubeTitle,
     description: youtubeDescription,
-    timestamps,
-    hashtags,
+    hashtags: hashtags.slice(0, 15),
+    allSeoTags: hashtags,
+    allSeoTagsText,
     fullCopyText,
   };
 

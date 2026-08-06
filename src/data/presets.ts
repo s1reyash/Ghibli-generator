@@ -71,6 +71,17 @@ export const EVENTS: PresetItem[] = [
   { id: 'picnic', name: 'Spring Blossom Picnic', emoji: '🌸', description: 'Woven blanket laid beneath fluttering pink cherry blossom petals' },
 ];
 
+export const MORAL_LESSONS: PresetItem[] = [
+  { id: 'kindness', name: 'Kindness to Strangers & Gentle Heart', emoji: '💖', description: 'Small acts of warmth open magical doors and heal quiet hearts' },
+  { id: 'patience', name: 'Patience & Nature’s Quiet Growth', emoji: '🌱', description: 'Great beauty blooms slowly in its own natural season' },
+  { id: 'friendship', name: 'Forgiveness & True Companionship', emoji: '🤝', description: 'Shared silence and trust create unbreakable bonds' },
+  { id: 'courage', name: 'Courage in the Face of the Unknown', emoji: '🕯️', description: 'Stepping forward with fearlessness turns shadows into guiding light' },
+  { id: 'gratitude', name: 'Gratitude for Small Daily Blessings', emoji: '🌸', description: 'True wealth lies in warmth, rain, bread, and simple peace' },
+  { id: 'harmony', name: 'Harmony with Nature & All Spirits', emoji: '🕊️', description: 'Treading lightly on the earth brings peace to all living beings' },
+  { id: 'present-moment', name: 'Cherishing the Quiet Present Moment', emoji: '🌾', description: 'Life happens in slow gentle breaths, not rushed destinations' },
+  { id: 'perseverance', name: 'Perseverance on Long Journeys', emoji: '🧳', description: 'Every small step brings you closer to your true sanctuary' },
+];
+
 export const MOODS: PresetItem[] = [
   { id: 'peaceful', name: 'Peaceful', emoji: '🕊️' },
   { id: 'nostalgic', name: 'Nostalgic', emoji: '🌾' },

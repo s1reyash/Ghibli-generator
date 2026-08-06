@@ -1,0 +1,123 @@
+// 100 High-Ranking Viral YouTube Shorts & TikTok SEO Tags Library
+
+export const VIRAL_SEO_TAGS_100: string[] = [
+  // 🌟 Studio Ghibli & Anime Aesthetic Tags (20)
+  '#StudioGhibli',
+  '#GhibliAesthetic',
+  '#GhibliStyle',
+  '#AnimeAnimation',
+  '#GhibliVibes',
+  '#HayaoMiyazaki',
+  '#AnimeArt',
+  '#AnimeAesthetics',
+  '#HandPaintedAnime',
+  '#WatercolorAnime',
+  '#JapaneseAnimation',
+  '#StudioGhibliInspired',
+  '#AnimeWorld',
+  '#WhimsicalAnime',
+  '#FantasyAnime',
+  '#ClassicAnimeStyle',
+  '#AnimeBackgrounds',
+  '#GhibliLoFi',
+  '#AnimeScenery',
+  '#AnimeVibe',
+
+  // 🎧 ASMR & Relaxation Foley Tags (15)
+  '#AnimeASMR',
+  '#VisualASMR',
+  '#ASMRSounds',
+  '#FoleyASMR',
+  '#NoMusicASMR',
+  '#NatureASMR',
+  '#RelaxingASMR',
+  '#CozyASMR',
+  '#AmbientASMR',
+  '#CalmSounds',
+  '#SatisfyingSounds',
+  '#SoothingASMR',
+  '#ASMRAudio',
+  '#RelaxationVideo',
+  '#DeepRelaxation',
+
+  // 🤖 AI Video & Animation Tech Tags (15)
+  '#AIAnimation',
+  '#AIVideo',
+  '#AIGenerated',
+  '#AIGeneratedArt',
+  '#LumaDreamMachine',
+  '#MidjourneyAnime',
+  '#KlingAI',
+  '#AIArt',
+  '#GenerativeAI',
+  '#AIVideoGenerator',
+  '#AIMotion',
+  '#AIBookmark',
+  '#SoraAI',
+  '#AIStorytelling',
+  '#FutureOfAI',
+
+  // 📱 YouTube Shorts Virality & Trending Tags (15)
+  '#Shorts',
+  '#YouTubeShorts',
+  '#ShortsTrending',
+  '#ShortsViral',
+  '#ShortsFeed',
+  '#ShortsVideo',
+  '#ViralShorts',
+  '#ShortsApp',
+  '#ShortsContent',
+  '#FYP',
+  '#ForYouPage',
+  '#TrendingNow',
+  '#ExplorePage',
+  '#MustWatch',
+  '#ViralVideo',
+
+  // 🌿 Cozy Vibes, Peace & Nature Tags (15)
+  '#CozyVibes',
+  '#PeacefulMind',
+  '#SereneNature',
+  '#Mindfulness',
+  '#CozyAesthetic',
+  '#NatureLovers',
+  '#RainyVibes',
+  '#GoldenHourVibes',
+  '#CalmVibes',
+  '#ChillVibes',
+  '#QuietMoments',
+  '#SlowLiving',
+  '#Cottagecore',
+  '#WarmAtmosphere',
+  '#NatureBeauty',
+
+  // 📜 Moral Stories, Fables & Wholesome Tale Tags (10)
+  '#MoralStory',
+  '#WholesomeStory',
+  '#LifeLessons',
+  '#KindnessMatters',
+  '#Heartwarming',
+  '#FableStory',
+  '#InspiringStory',
+  '#PeaceAndKindness',
+  '#GoodVibesOnly',
+  '#WisdomTales',
+
+  // 🎬 Vertical 9:16 Cinematography Tags (10)
+  '#VerticalVideo',
+  '#9x16',
+  '#PortraitVideo',
+  '#CinematicShorts',
+  '#MobileCinematography',
+  '#CinematicVibes',
+  '#StorytellingShorts',
+  '#CinematicFrame',
+  '#VerticalShorts',
+  '#VisualStorytelling',
+];
+
+export const get100SeoTagsFormatted = (): { hashtags: string[]; fullText: string } => {
+  const hashtags = VIRAL_SEO_TAGS_100;
+  const fullText = hashtags.join(' ');
+  return { hashtags, fullText };
+};

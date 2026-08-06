@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import type { GenerationResult, ScenePrompt } from '../types/generator';
-import { SceneAnimationDeck } from './SceneAnimationDeck';
 import { YouTubeMetadataCard } from './YouTubeMetadataCard';
 import { Copy, Check, Film, ShieldAlert, Sparkles, Clock, Volume2, Anchor, ShieldCheck, Download, Smartphone, Bookmark, Zap } from 'lucide-react';
 
@@ -215,13 +214,6 @@ ${result.negativePrompt}`;
                   </button>
                 </div>
               </div>
-
-              {/* Live Animated Canvas Deck */}
-              <SceneAnimationDeck
-                sceneNumber={(scene.sceneNumber > 3 ? 3 : scene.sceneNumber) as 1 | 2 | 3}
-                weather={result.bible.environmentLock.weather}
-                timeOfDay={result.bible.environmentLock.timeOfDay}
-              />
 
               {/* Quick Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">

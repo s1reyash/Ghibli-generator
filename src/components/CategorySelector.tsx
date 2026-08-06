@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import type { UserSelections } from '../types/generator';
-import { CHARACTERS, ANIMALS, OBJECTS, PLACES, EVENTS, MOODS, TIMES, WEATHER } from '../data/presets';
+import { CHARACTERS, ANIMALS, OBJECTS, PLACES, EVENTS, MORAL_LESSONS, MOODS, TIMES, WEATHER } from '../data/presets';
 import { QUICK_TEMPLATES } from '../data/quickTemplates';
 import type { QuickTemplate } from '../data/quickTemplates';
 import { CameraLightingMatrix } from './CameraLightingMatrix';
-import { User, Feather, Package, MapPin, Sparkles, Sun, Check, Wand2, Sliders, Calendar, Film } from 'lucide-react';
+import { User, Feather, Package, MapPin, Sparkles, Sun, Check, Wand2, Sliders, Calendar, Film, HeartHandshake } from 'lucide-react';
 
 interface CategorySelectorProps {
   selections: UserSelections;
@@ -12,7 +12,7 @@ interface CategorySelectorProps {
   onSelectTemplate: (template: QuickTemplate) => void;
 }
 
-type TabType = 'character' | 'animal' | 'object' | 'place' | 'event' | 'matrix' | 'mood' | 'environment';
+type TabType = 'character' | 'animal' | 'object' | 'place' | 'event' | 'moral' | 'matrix' | 'mood' | 'environment';
 
 export const CategorySelector: React.FC<CategorySelectorProps> = ({
   selections,
@@ -88,7 +88,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
         <div className="flex flex-wrap items-center justify-between gap-1 p-1 bg-[#F2F0E8] rounded-2xl mb-5 border border-[#E2E0D8]">
           <button
             onClick={() => setActiveTab('character')}
-            className={`flex-1 min-w-[90px] flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs md:text-sm font-semibold transition cursor-pointer ${
+            className={`flex-1 min-w-[85px] flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-xs md:text-sm font-semibold transition cursor-pointer ${
               activeTab === 'character'
                 ? 'bg-[#111827] text-white shadow-xs'
                 : 'text-[#4B5563] hover:text-[#111827]'
@@ -100,7 +100,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
 
           <button
             onClick={() => setActiveTab('animal')}
-            className={`flex-1 min-w-[90px] flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs md:text-sm font-semibold transition cursor-pointer ${
+            className={`flex-1 min-w-[85px] flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-xs md:text-sm font-semibold transition cursor-pointer ${
               activeTab === 'animal'
                 ? 'bg-[#111827] text-white shadow-xs'
                 : 'text-[#4B5563] hover:text-[#111827]'
@@ -112,7 +112,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
 
           <button
             onClick={() => setActiveTab('object')}
-            className={`flex-1 min-w-[90px] flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs md:text-sm font-semibold transition cursor-pointer ${
+            className={`flex-1 min-w-[85px] flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-xs md:text-sm font-semibold transition cursor-pointer ${
               activeTab === 'object'
                 ? 'bg-[#111827] text-white shadow-xs'
                 : 'text-[#4B5563] hover:text-[#111827]'
@@ -124,7 +124,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
 
           <button
             onClick={() => setActiveTab('place')}
-            className={`flex-1 min-w-[80px] flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs md:text-sm font-semibold transition cursor-pointer ${
+            className={`flex-1 min-w-[75px] flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-xs md:text-sm font-semibold transition cursor-pointer ${
               activeTab === 'place'
                 ? 'bg-[#111827] text-white shadow-xs'
                 : 'text-[#4B5563] hover:text-[#111827]'
@@ -136,19 +136,31 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
 
           <button
             onClick={() => setActiveTab('event')}
-            className={`flex-1 min-w-[100px] flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs md:text-sm font-bold transition cursor-pointer ${
+            className={`flex-1 min-w-[95px] flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-xs md:text-sm font-semibold transition cursor-pointer ${
               activeTab === 'event'
                 ? 'bg-[#15803D] text-white shadow-xs'
                 : 'text-[#15803D] hover:bg-[#15803D]/10'
             }`}
           >
             <Calendar className="w-3.5 h-3.5" />
-            <span>Events & Scenarios</span>
+            <span>Events</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('moral')}
+            className={`flex-1 min-w-[110px] flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-xs md:text-sm font-bold transition cursor-pointer ${
+              activeTab === 'moral'
+                ? 'bg-rose-700 text-white shadow-xs'
+                : 'text-rose-700 hover:bg-rose-50'
+            }`}
+          >
+            <HeartHandshake className="w-3.5 h-3.5" />
+            <span>Moral & Fable</span>
           </button>
 
           <button
             onClick={() => setActiveTab('matrix')}
-            className={`flex-1 min-w-[110px] flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs md:text-sm font-bold transition cursor-pointer ${
+            className={`flex-1 min-w-[100px] flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-xs md:text-sm font-bold transition cursor-pointer ${
               activeTab === 'matrix'
                 ? 'bg-[#DC2626] text-white shadow-xs'
                 : 'text-[#DC2626] hover:bg-[#DC2626]/10'
@@ -160,7 +172,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
 
           <button
             onClick={() => setActiveTab('mood')}
-            className={`flex-1 min-w-[70px] flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs md:text-sm font-semibold transition cursor-pointer ${
+            className={`flex-1 min-w-[65px] flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-xs md:text-sm font-semibold transition cursor-pointer ${
               activeTab === 'mood'
                 ? 'bg-[#111827] text-white shadow-xs'
                 : 'text-[#4B5563] hover:text-[#111827]'
@@ -172,7 +184,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
 
           <button
             onClick={() => setActiveTab('environment')}
-            className={`flex-1 min-w-[100px] flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs md:text-sm font-semibold transition cursor-pointer ${
+            className={`flex-1 min-w-[95px] flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-xs md:text-sm font-semibold transition cursor-pointer ${
               activeTab === 'environment'
                 ? 'bg-[#111827] text-white shadow-xs'
                 : 'text-[#4B5563] hover:text-[#111827]'
@@ -376,6 +388,46 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
           </div>
         )}
 
+        {activeTab === 'moral' && (
+          <div className="space-y-4 animate-fade-in">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-bold text-[#111827]">Select Story Moral & Life Lesson (道徳・教訓):</span>
+              <span className="text-[#6B7280]">Weaves wholesome life message into prompts</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
+              {MORAL_LESSONS.map(item => {
+                const isSelected = selections.moralLesson === item.name;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => onChange({ moralLesson: isSelected ? '' : item.name })}
+                    className={`p-3 rounded-xl border text-left text-xs transition cursor-pointer ${
+                      isSelected
+                        ? 'bg-rose-700 text-white border-rose-700 font-bold shadow-xs'
+                        : 'bg-[#FAF9F6] border-[#E2E0D8] text-[#374151] hover:border-rose-700'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold">{item.emoji} {item.name}</span>
+                      {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
+                    </div>
+                    <div className="text-[10px] opacity-85 mt-1">{item.description}</div>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="pt-2 border-t border-[#E2E0D8]">
+              <input
+                type="text"
+                value={selections.customMoralLesson || ''}
+                onChange={e => onChange({ customMoralLesson: e.target.value, moralLesson: '' })}
+                placeholder="Or enter custom moral lesson (e.g. Forgiving past mistakes builds true harmony)..."
+                className="w-full px-3.5 py-2 rounded-xl border border-[#E2E0D8] bg-[#FAF9F6] text-xs text-[#111827] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#111827]"
+              />
+            </div>
+          </div>
+        )}
+
         {activeTab === 'matrix' && (
           <div className="animate-fade-in">
             <CameraLightingMatrix
@@ -479,6 +531,11 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
           <span className="px-2 py-0.5 rounded-md bg-[#F2F0E8] border border-[#E2E0D8] text-[#111827]">
             🌲 {selections.customPlace || selections.place || 'Enchanted Forest'}
           </span>
+          {(selections.moralLesson || selections.customMoralLesson) && (
+            <span className="px-2 py-0.5 rounded-md bg-rose-100 border border-rose-300 text-rose-900 font-bold">
+              💖 Moral: {selections.customMoralLesson || selections.moralLesson}
+            </span>
+          )}
           {(selections.event || selections.customEvent) && (
             <span className="px-2 py-0.5 rounded-md bg-emerald-100 border border-emerald-300 text-emerald-900 font-semibold">
               🚗 Event: {selections.customEvent || selections.event}
