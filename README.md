@@ -1,32 +1,19 @@
-# React + TypeScript + Vite
+Ghibli Story Generator
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Ghibli Story Generator is a browser based creative tool for crafting animation inspired stories and structured image generation prompts. Users combine characters, settings, objects, moods, lighting, camera choices, and story beats to create scene directions.
 
-Currently, two official plugins are available:
+Product overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+The app offers creative presets and custom fields, multi scene prompt generation, random idea combinations, camera controls, prompt verification, SEO tags, and YouTube metadata.
 
-## React Compiler
+Technology
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The project uses React 19, TypeScript, Vite, Tailwind CSS, Lucide React, and canvas confetti.
 
-## Expanding the Oxlint configuration
+Run locally
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+Install dependencies with npm install, then start the app with npm run dev. Use npm run build to create a production build.
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
+Product notes
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+The generator runs in the browser and does not call an image generation API. It is intended for ideation, storyboarding, and preparing prompts for an external creative model.
